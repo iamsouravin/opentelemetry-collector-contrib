@@ -1,0 +1,17 @@
+receivers:
+  examplereceiver:
+
+processors:
+  name:
+    from_char: '*'
+    to_char: '+'
+
+exporters:
+  exampleexporter:
+
+service:
+  pipelines:
+    traces:
+      receivers: [examplereceiver]
+      processors: [name]
+      exporters: [exampleexporter]
