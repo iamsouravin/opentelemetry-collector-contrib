@@ -1,0 +1,17 @@
+receivers:
+  examplereceiver:
+
+processors:
+  traceid:
+    cache_endpoint: local://
+    ttl: 604800
+
+exporters:
+  exampleexporter:
+
+service:
+  pipelines:
+    traces:
+      receivers: [examplereceiver]
+      processors: [traceid]
+      exporters: [exampleexporter]
