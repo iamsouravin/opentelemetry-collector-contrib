@@ -44,7 +44,7 @@ func TestLoadConfig(t *testing.T) {
 				NameVal: "name",
 				TypeVal: "name",
 			},
-			FromChar:    "*",
-			ToChar:      "+",
+			FromChar: "*",
+			ToChar:   "+",
 		})
 }

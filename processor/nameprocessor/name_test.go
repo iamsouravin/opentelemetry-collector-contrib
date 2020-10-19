@@ -17,7 +17,7 @@ package nameprocessor
 import (
 	"context"
 	"testing"
-	
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
@@ -29,7 +29,7 @@ import (
 )
 
 func newTraceProcessor(cfg configmodels.Processor, nextTraceConsumer consumer.TraceConsumer) (component.TraceProcessor, error) {
-	
+
 	return createTraceProcessor(
 		context.Background(),
 		component.ProcessorCreateParams{Logger: zap.NewNop()},
@@ -42,8 +42,8 @@ type multiTest struct {
 	t *testing.T
 
 	tp component.TraceProcessor
-	
-	nextTrace   *exportertest.SinkTraceExporter
+
+	nextTrace *exportertest.SinkTraceExporter
 }
 
 func newMultiTest(
@@ -52,8 +52,8 @@ func newMultiTest(
 	errFunc func(err error),
 ) *multiTest {
 	m := &multiTest{
-		t:           t,
-		nextTrace:   &exportertest.SinkTraceExporter{},
+		t:         t,
+		nextTrace: &exportertest.SinkTraceExporter{},
 	}
 
 	tp, err := newTraceProcessor(cfg, m.nextTrace)

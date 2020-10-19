@@ -45,8 +45,8 @@ func createDefaultConfig() configmodels.Processor {
 			TypeVal: typeStr,
 			NameVal: typeStr,
 		},
-		FromChar:   "*",
-		ToChar:  "+",
+		FromChar: "*",
+		ToChar:   "+",
 	}
 }
 
