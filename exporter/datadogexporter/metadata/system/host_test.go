@@ -12,11 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cloud
+package system
 
-const (
-	// ProviderAWS is used in cloud.provider label for AWS.
-	ProviderAWS = "aws"
-	// ProviderGCP is used in cloud.provider label for GCP.
-	ProviderGCP = "gcp"
+import (
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
+
+func TestGetHostInfo(t *testing.T) {
+	logger := zap.NewNop()
+
+	hostInfo := GetHostInfo(logger)
+	require.NotNil(t, hostInfo)
+
+	osHostname, err := os.Hostname()
+	require.NoError(t, err)
+	assert.Equal(t, hostInfo.OS, osHostname)
+}
