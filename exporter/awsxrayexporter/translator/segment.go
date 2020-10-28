@@ -87,9 +87,11 @@ func MakeSegment(span pdata.Span, resource pdata.Resource, indexedAttrs []string
 
 	storeResource := true
 	if span.Kind() != pdata.SpanKindSERVER {
-		segmentType = "subsegment"
-		// We only store the resource information for segments, the local root.
-		storeResource = false
+		if ((span.Kind() == pdata.SpanKindCLIENT || span.Kind() == pdata.SpanKindPRODUCER || span.Kind() == pdata.SpanKindINTERNAL) && span.ParentSpanID() != nil) || span.Kind() == pdata.SpanKindCONSUMER || span.Kind() == pdata.SpanKindUNSPECIFIED {
+			segmentType = "subsegment"
+			// We only store the resource information for segments, the local root.
+			storeResource = false
+		}
 	}
 
 	// convert trace id
