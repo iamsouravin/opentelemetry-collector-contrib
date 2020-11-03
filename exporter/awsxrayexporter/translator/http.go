@@ -54,7 +54,8 @@ func makeHTTP(span pdata.Span) (map[string]string, *awsxray.HTTPData) {
 			info.Request.UserAgent = awsxray.String(value.StringVal())
 			hasHTTP = true
 		case semconventions.AttributeHTTPStatusCode:
-			info.Response.Status = aws.Int64(value.IntVal())
+			statusCode := extractHTTPStatusCode(value)
+			info.Response.Status = aws.Int64(statusCode)
 			hasHTTP = true
 		case semconventions.AttributeHTTPURL:
 			urlParts[key] = value.StringVal()
@@ -218,4 +219,21 @@ func constructServerURL(urlParts map[string]string) string {
 		url += "/"
 	}
 	return url
+}
+
+func extractHTTPStatusCode(value pdata.AttributeValue) int64 {
+	var statusCode int64
+	var err error
+	switch value.Type() {
+	case pdata.AttributeValueSTRING:
+		statusCode, err = strconv.ParseInt(value.StringVal(), 10, 64)
+		if err != nil {
+			statusCode = 0
+		}
+	case pdata.AttributeValueINT:
+		statusCode = value.IntVal()
+	default:
+		statusCode = 0
+	}
+	return statusCode
 }

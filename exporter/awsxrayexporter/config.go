@@ -46,4 +46,10 @@ type Config struct {
 	// Set to true to convert all OpenTelemetry attributes to X-Ray annotation (indexed) ignoring the IndexedAttributes option.
 	// Default value: false
 	IndexAllAttributes bool `mapstructure:"index_all_attributes"`
+	// Cache endpoint for correlating TraceIDs and epoch values.
+	// Use cache URI scheme to switch cache providers
+	// Supports "local://" for in-memory cache.
+	TraceIDCacheEndpoint string `mapstructure:"traceid_cache_endpoint"`
+	// Time to live in seconds for cached TraceIDs.
+	TraceIDCacheTTLSeconds int `mapstructure:"traceid_cache_ttl_seconds"`
 }

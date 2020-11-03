@@ -279,12 +279,30 @@ func TestSpanWithInvalidTraceId(t *testing.T) {
 	traceID[0] = 0x11
 	span.SetTraceID(pdata.NewTraceID(traceID))
 
-	_, err := MakeSegmentDocumentString(span, resource, nil, false)
+	start := int64(span.StartTime())
+	expected := fmt.Sprintf("%x", (start / int64(time.Second)))
 
-	assert.NotNil(t, err)
+	xraySegmentDoc, err := MakeSegmentDocumentString(span, resource, nil, false)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, xraySegmentDoc)
+
+	traceIDIndex := strings.Index(xraySegmentDoc, "trace_id")
+	assert.NotEqual(t, -1, traceIDIndex)
+	epochStartIndex := strings.Index(xraySegmentDoc[traceIDIndex:], "-") + 1
+	assert.NotEqual(t, -1, epochStartIndex)
+	actual := xraySegmentDoc[traceIDIndex+epochStartIndex : traceIDIndex+epochStartIndex+8]
+	assert.Equal(t, expected, actual)
 }
 
-func TestSpanWithExpiredTraceId(t *testing.T) {
+func TestSpanWithExpiredTraceIdAdjustedWithStartTime(t *testing.T) {
+	spanName := "platformapi.widgets.searchWidgets"
+	attributes := make(map[string]interface{})
+
+	span := constructClientSpan(pdata.InvalidSpanID(), spanName, 0, "OK", attributes)
+	start := int64(span.StartTime())
+	expected := fmt.Sprintf("%x", (start / int64(time.Second)))
+
 	// First Build expired TraceId
 	const maxAge = 60 * 60 * 24 * 30
 	ExpiredEpoch := time.Now().Unix() - maxAge - 1
@@ -292,8 +310,13 @@ func TestSpanWithExpiredTraceId(t *testing.T) {
 	tempTraceID := newTraceID().Bytes()
 	binary.BigEndian.PutUint32(tempTraceID[0:4], uint32(ExpiredEpoch))
 
-	_, err := convertToAmazonTraceID(pdata.NewTraceID(tempTraceID))
-	assert.NotNil(t, err)
+	span.SetTraceID(pdata.NewTraceID(tempTraceID))
+
+	xrayTraceID, err := convertToAmazonTraceID(span)
+	assert.Nil(t, err)
+	assert.NotNil(t, xrayTraceID)
+
+	assert.Equal(t, expected, xrayTraceID[strings.Index(xrayTraceID, "-")+1:strings.LastIndex(xrayTraceID, "-")])
 }
 
 func TestFixSegmentName(t *testing.T) {

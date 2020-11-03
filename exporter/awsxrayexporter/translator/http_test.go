@@ -264,6 +264,27 @@ func TestHttpStatusFromSpanStatus(t *testing.T) {
 	assert.True(t, strings.Contains(jsonStr, "200"))
 }
 
+func TestHttpStatusFromAttrStatusAsString(t *testing.T) {
+	attributes := make(map[string]interface{})
+	attributes[semconventions.AttributeHTTPStatusCode] = "200"
+	spanAttributes := constructSpanAttributes(attributes)
+	span := pdata.NewSpan()
+	span.InitEmpty()
+	spanAttributes.CopyTo(span.Attributes())
+
+	filtered, httpData := makeHTTP(span)
+
+	assert.NotNil(t, httpData)
+	assert.NotNil(t, filtered)
+	w := testWriters.borrow()
+	if err := w.Encode(httpData); err != nil {
+		assert.Fail(t, "invalid json")
+	}
+	jsonStr := w.String()
+	testWriters.release(w)
+	assert.True(t, strings.Contains(jsonStr, "200"))
+}
+
 func constructHTTPClientSpan(attributes map[string]interface{}) pdata.Span {
 	endTime := time.Now().Round(time.Second)
 	startTime := endTime.Add(-90 * time.Second)

@@ -26,6 +26,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.uber.org/zap"
 
+	traceCache "github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter/cache"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/exporter/awsxrayexporter/translator"
 )
 
@@ -42,6 +43,11 @@ func NewTraceExporter(config configmodels.Exporter, logger *zap.Logger, cn connA
 	if err != nil {
 		return nil, err
 	}
+	translator.TraceIDCache, err = createTraceIDCache(config)
+	if err != nil {
+		return nil, err
+	}
+
 	xrayClient := NewXRay(logger, awsConfig, session)
 	return exporterhelper.NewTraceExporter(
 		config,
@@ -116,4 +122,19 @@ func wrapErrorIfBadRequest(err *error) error {
 		return consumererror.Permanent(*err)
 	}
 	return *err
+}
+
+func createTraceIDCache(config configmodels.Exporter) (traceCache.Cache, error) {
+	cacheProvider := traceCache.NewProvider()
+	cfg := config.(*Config)
+	cacheEndpoint := cfg.TraceIDCacheEndpoint
+	if cacheEndpoint == "" {
+		cacheEndpoint = "local://"
+	}
+	cacheTTL := cfg.TraceIDCacheTTLSeconds
+	if cacheTTL <= 0 {
+		cacheTTL = 60
+	}
+	cache, err := cacheProvider(cacheEndpoint, cacheTTL)
+	return cache, err
 }
