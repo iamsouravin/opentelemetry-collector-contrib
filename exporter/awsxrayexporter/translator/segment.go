@@ -471,6 +471,16 @@ func processUpstreamAttribute(span pdata.Span) {
 				attributes.Upsert(semconventions.AttributePeerService, pdata.NewAttributeValueString(upStreamService))
 			}
 		}
+		if HTTPStatusCode, HTTPStatusCodeExists := attributes.Get(semconventions.AttributeHTTPStatusCode); HTTPStatusCodeExists {
+			switch HTTPStatusCode.Type() {
+			case pdata.AttributeValueSTRING:
+				statusCode, err := strconv.ParseInt(HTTPStatusCode.StringVal(), 10, 64)
+				if err != nil {
+					statusCode = 0
+				}
+				attributes.UpsertInt(semconventions.AttributeHTTPStatusCode, statusCode)
+			}
+		}
 	}
 }
 
