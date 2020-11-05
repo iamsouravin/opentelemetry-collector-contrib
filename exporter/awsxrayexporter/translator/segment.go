@@ -483,7 +483,7 @@ func processUpstreamAttribute(span pdata.Span) {
 				if err != nil {
 					statusCode = 0
 				}
-				attributes.UpsertInt(semconventions.AttributeHTTPStatusCode, statusCode)
+				HTTPStatusCode.SetIntVal(statusCode)
 			}
 		}
 	}
