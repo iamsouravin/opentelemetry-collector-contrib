@@ -461,6 +461,11 @@ func processUpstreamAttribute(span pdata.Span) {
 		upStreamClusterVal := upStreamCluster.StringVal()
 		if strings.HasPrefix(upStreamClusterVal, "inbound|") {
 			span.SetKind(pdata.SpanKindSERVER)
+			_, netPeerIPExists := attributes.Get(semconventions.AttributeNetPeerIP)
+			_, HTTPClientIPExists := attributes.Get(semconventions.AttributeHTTPClientIP)
+			if peerAddress, peerAddressExists := attributes.Get("peer.address"); !netPeerIPExists && !HTTPClientIPExists && peerAddressExists {
+				attributes.UpsertString(semconventions.AttributeNetPeerIP, peerAddress.StringVal())
+			}
 		}
 		if strings.HasPrefix(upStreamClusterVal, "outbound|") {
 			if vertBarLastIndex := strings.LastIndex(upStreamClusterVal, "|"); vertBarLastIndex != -1 {
