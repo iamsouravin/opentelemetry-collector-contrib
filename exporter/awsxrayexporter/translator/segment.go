@@ -486,6 +486,9 @@ func processUpstreamAttribute(span pdata.Span) {
 				HTTPStatusCode.SetIntVal(statusCode)
 			}
 		}
+		if userAgent, userAgentExists := attributes.Get("user_agent"); userAgentExists {
+			attributes.Upsert(semconventions.AttributeHTTPUserAgent, pdata.NewAttributeValueString(userAgent.StringVal()))
+		}
 	}
 }
 
